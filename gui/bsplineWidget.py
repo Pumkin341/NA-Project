@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QRegExp
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtGui import QRegExpValidator
 
 import numpy as np
 from scipy import interpolate
@@ -173,6 +174,11 @@ class BSplineWidget(QWidget):
         xField = QLineEdit()
         yField = QLineEdit()
         
+        reg_ex = QRegExp("[0-9]+.?[0-9]{,2}")
+        input_validator = QRegExpValidator(reg_ex, xField)
+        xField.setValidator(input_validator)
+        yField.setValidator(input_validator)
+        
         pointLayout.addWidget(pointLabel, 0, 0)
         pointLayout.addWidget(xField, 0, 1)
         pointLayout.addWidget(yField, 0, 2)
@@ -187,8 +193,11 @@ class BSplineWidget(QWidget):
                 pointLayout.removeWidget(widget)
                 widget.deleteLater()
             pointLayout.deleteLater()
-        self.pointsArray.clear()
-        self.points.clear()
+        if self.pointsArray != []:
+            self.pointsArray.clear()
+        
+        if self.points != []:
+            self.points.clear()
         
     def generate_knots(self):
         if len(self.pointsArray) == 0:
