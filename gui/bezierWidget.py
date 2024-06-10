@@ -125,27 +125,7 @@ class BezierWidget(QWidget):
         else:
             count = self.combo.currentIndex() + 1
 
-        for j in range(count + 1):
-            row = QWidget()
-            layout_row = QHBoxLayout()
-            layout_row.setContentsMargins(0, 0, 0, 0)
-            row.setLayout(layout_row)
-            label = QLabel(f'P{j + 1}')
-            layout_row.addWidget(label)
-
-            line_edit1 = QLineEdit()
-            line_edit1.setPlaceholderText('Set x')
-            line_edit1.setFixedSize(100, 20)
-            layout_row.addWidget(line_edit1)
-
-            line_edit2 = QLineEdit()
-            line_edit2.setPlaceholderText('Set y')
-            line_edit2.setFixedSize(100, 20)
-            layout_row.addWidget(line_edit2)
-
-            row.setFixedHeight(20)
-            self.input_layout.addWidget(row)
-
+        self.adjust_input_fields(count + 1)
         self.wid.adjustSize()
         self.adjustSize()
         self.previous_index = self.combo.currentIndex()
@@ -286,7 +266,25 @@ class BezierWidget(QWidget):
         current_fields = self.input_layout.count()
         if required_fields > current_fields:
             for _ in range(required_fields - current_fields):
-                self.add_input_field()
+                row = QWidget()
+                layout_row = QHBoxLayout()
+                layout_row.setContentsMargins(0, 0, 0, 0)
+                row.setLayout(layout_row)
+                label = QLabel(f'P{self.input_layout.count() + 1}')
+                layout_row.addWidget(label)
+
+                line_edit1 = QLineEdit()
+                line_edit1.setPlaceholderText('Set x')
+                line_edit1.setFixedSize(100, 20)
+                layout_row.addWidget(line_edit1)
+
+                line_edit2 = QLineEdit()
+                line_edit2.setPlaceholderText('Set y')
+                line_edit2.setFixedSize(100, 20)
+                layout_row.addWidget(line_edit2)
+
+                row.setFixedHeight(20)
+                self.input_layout.addWidget(row)
         elif required_fields < current_fields:
             for _ in range(current_fields - required_fields):
                 item = self.input_layout.itemAt(self.input_layout.count() - 1)
@@ -294,23 +292,16 @@ class BezierWidget(QWidget):
                     item.widget().deleteLater()
                     self.input_layout.removeWidget(item.widget())
 
-    def add_input_field(self):
-        row = QWidget()
-        layout_row = QHBoxLayout()
-        layout_row.setContentsMargins(0, 0, 0, 0)
-        row.setLayout(layout_row)
-        label = QLabel(f'P{self.input_layout.count() + 1}')
-        layout_row.addWidget(label)
-
-        line_edit1 = QLineEdit()
-        line_edit1.setPlaceholderText('Set x')
-        line_edit1.setFixedSize(100, 20)
-        layout_row.addWidget(line_edit1)
-
-        line_edit2 = QLineEdit()
-        line_edit2.setPlaceholderText('Set y')
-        line_edit2.setFixedSize(100, 20)
-        layout_row.addWidget(line_edit2)
-
-        row.setFixedHeight(20)
-        self.input_layout.addWidget(row)
+        if required_fields > self.combo.currentIndex() + 1:
+            if required_fields <= 4:
+                self.combo.setCurrentIndex(required_fields - 1)
+            else:
+                self.combo.setCurrentIndex(4)
+                self.previous_index = 4
+                num, ok = QInputDialog.getInt(self, "Degree input dialog", "Enter a degree", value=required_fields - 1, min=5, max=100)
+                if ok:
+                    count = num
+                    while self.input_layout.count() < count + 1:
+                        self.add_input_field()
+                else:
+                    return
