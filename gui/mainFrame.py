@@ -6,7 +6,7 @@ class MainFrame(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Main Frame')
-        self.setGeometry(100, 100, 1200, 800)
+        self.setGeometry(100, 100, 1400, 850)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)

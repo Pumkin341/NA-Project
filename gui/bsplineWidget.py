@@ -444,4 +444,5 @@ class BSplineWidget(QWidget):
                 knots_str = json_data['knots']
                 knots = list(map(float, knots_str.split()))
                 self.knotVectorField.setText(' '.join(map(str, knots)))
-    
+
+                

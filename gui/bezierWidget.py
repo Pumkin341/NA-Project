@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox, QLineEdit, QLabel, QInputDialog, QScrollArea, QErrorMessage, QSlider
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox, QLineEdit, QLabel, QInputDialog, QScrollArea, QErrorMessage, QSlider, QFileDialog
 from PyQt5.QtCore import Qt
 import matplotlib
 import matplotlib.pyplot as plt
@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import numpy as np
 import random
+import json
 
 class BezierWidget(QWidget):
     def __init__(self):
@@ -25,6 +26,8 @@ class BezierWidget(QWidget):
         self.generate_button = QPushButton("Generate random values")
         self.clear_button = QPushButton("Clear input fields")
         self.generate_plot_button = QPushButton("Plot")
+        self.import_button = QPushButton("Import from file")
+        self.import_json_button = QPushButton("Import from JSON file")
 
         self.wid = QWidget()
         self.scroll_area = QScrollArea()
@@ -54,12 +57,16 @@ class BezierWidget(QWidget):
         self.generate_button.clicked.connect(self.generate_values)
         self.clear_button.clicked.connect(self.clear_fields)
         self.generate_plot_button.clicked.connect(self.generate_plot)
+        self.import_button.clicked.connect(self.import_from_file)
+        self.import_json_button.clicked.connect(self.import_from_json_file)
 
         self.layout.addWidget(self.degree_label)
         self.layout.addWidget(self.combo)
         self.layout.addWidget(self.scroll_area)
         self.layout.addWidget(self.clear_button)
         self.layout.addWidget(self.generate_button)
+        self.layout.addWidget(self.import_button)
+        self.layout.addWidget(self.import_json_button)
         self.layout.addWidget(self.generate_plot_button)
         self.layout.addWidget(self.canvas)
         self.layout.addWidget(self.slider)
@@ -222,3 +229,88 @@ class BezierWidget(QWidget):
             row_layout = row_widget.layout()
             row_layout.itemAt(1).widget().setText("")
             row_layout.itemAt(2).widget().setText("")
+
+    def import_from_file(self):
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Control Points File", "", "Text Files (*.txt);;All Files (*)", options=options)
+        if file_name:
+            try:
+                with open(file_name, 'r') as file:
+                    lines = file.readlines()
+                    self.control_points = []
+                    required_fields = len(lines)
+                    self.adjust_input_fields(required_fields)
+                    for i, line in enumerate(lines):
+                        parts = line.strip().split()
+                        if len(parts) == 2:
+                            x, y = float(parts[0]), float(parts[1])
+                            if i < self.input_layout.count():
+                                row_widget = self.input_layout.itemAt(i).widget()
+                                row_layout = row_widget.layout()
+                                row_layout.itemAt(1).widget().setText(str(x))
+                                row_layout.itemAt(2).widget().setText(str(y))
+                            self.control_points.append([x, y])
+                    self.update_plot(self.slider.value() / 100)
+            except Exception as e:
+                err = QErrorMessage()
+                err.showMessage(f"Failed to load file: {str(e)}")
+                err.exec_()
+
+    def import_from_json_file(self):
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Control Points JSON File", "", "JSON Files (*.json);;All Files (*)", options=options)
+        if file_name:
+            try:
+                with open(file_name, 'r') as file:
+                    data = json.load(file)
+                    self.control_points = []
+                    required_fields = len(data["points"])
+                    self.adjust_input_fields(required_fields)
+                    for i, point in enumerate(data["points"]):
+                        x = point.get("x")
+                        y = point.get("y")
+                        if x is not None and y is not None:
+                            if i < self.input_layout.count():
+                                row_widget = self.input_layout.itemAt(i).widget()
+                                row_layout = row_widget.layout()
+                                row_layout.itemAt(1).widget().setText(str(x))
+                                row_layout.itemAt(2).widget().setText(str(y))
+                            self.control_points.append([x, y])
+                    self.update_plot(self.slider.value() / 100)
+            except Exception as e:
+                err = QErrorMessage()
+                err.showMessage(f"Failed to load JSON file: {str(e)}")
+                err.exec_()
+
+    def adjust_input_fields(self, required_fields):
+        current_fields = self.input_layout.count()
+        if required_fields > current_fields:
+            for _ in range(required_fields - current_fields):
+                self.add_input_field()
+        elif required_fields < current_fields:
+            for _ in range(current_fields - required_fields):
+                item = self.input_layout.itemAt(self.input_layout.count() - 1)
+                if item.widget() is not None:
+                    item.widget().deleteLater()
+                    self.input_layout.removeWidget(item.widget())
+
+    def add_input_field(self):
+        row = QWidget()
+        layout_row = QHBoxLayout()
+        layout_row.setContentsMargins(0, 0, 0, 0)
+        row.setLayout(layout_row)
+        label = QLabel(f'P{self.input_layout.count() + 1}')
+        layout_row.addWidget(label)
+
+        line_edit1 = QLineEdit()
+        line_edit1.setPlaceholderText('Set x')
+        line_edit1.setFixedSize(100, 20)
+        layout_row.addWidget(line_edit1)
+
+        line_edit2 = QLineEdit()
+        line_edit2.setPlaceholderText('Set y')
+        line_edit2.setFixedSize(100, 20)
+        layout_row.addWidget(line_edit2)
+
+        row.setFixedHeight(20)
+        self.input_layout.addWidget(row)
