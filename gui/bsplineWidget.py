@@ -13,6 +13,10 @@ class BsplineFigure(FigureCanvas):
     def __init__(self, widget, width=5, height=5, dpi=100):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
+        self.ax.set_xlabel('x')
+        self.ax.set_ylabel('y')
+        self.ax.grid()
+        self.ax.set_title('B-Spline Curve')
         super().__init__(self.fig)
         self.widget = widget  
 
@@ -276,6 +280,11 @@ class BSplineWidget(QWidget):
             self.errorLabel.hide()
 
             self.figure.ax.clear()
+            self.figure.ax.grid()
+            self.figure.ax.set_xlabel('x')
+            self.figure.ax.set_ylabel('y')
+            self.figure.ax.set_title('B-Spline Curve')
+            
             self.figure.ax.plot(x, y, 'k--', label='Control polygon', marker='o', markerfacecolor='red')
             self.figure.ax.plot(out[0], out[1], 'b', label='B-spline curve')
 
@@ -325,6 +334,11 @@ class BSplineWidget(QWidget):
             self.errorLabel.hide()
 
             self.figure.ax.clear()
+            self.figure.ax.set_xlabel('x')
+            self.figure.ax.set_ylabel('y')
+            self.figure.ax.grid()
+            self.figure.ax.set_title('Interpolated B-Spline Curve')
+            
             self.figure.ax.plot(x, y, 'ro', label='Control points')
             self.figure.ax.plot(out[0], out[1], 'b', label='Interpolated B-spline')
 
