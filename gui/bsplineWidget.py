@@ -46,7 +46,7 @@ class AnimationWindow(QWidget):
         self.ax.set_xlabel('x')
         self.ax.set_ylabel('y')
         self.ax.set_title('B-Spline Curve Animation')
-
+        
         ctr = np.array(self.points)
         x = ctr[:, 0]
         y = ctr[:, 1]
@@ -407,12 +407,22 @@ class BSplineWidget(QWidget):
             
     def open_animation_window(self):
         self.update_values()
-        if self.points is None or self.degree is None:
+        
+        if self.points is None or self.degree is None or self.points == [] or len(self.points) < 2:
+            self.errorLabel.setText('Error: Not enough points')
             return
+        
         knots = self.get_knot_vector()
         if knots is None:
+            self.errorLabel.setText('Error: Empty Knot Vector')
             return
-
+        
+        if len(knots) != len(self.points) + self.degree + 1:
+            self.errorLabel.setText('Error: Number of knots must be equal to number of control points + degree + 1')
+            return
+        
+        self.errorLabel.hide()
+    
         self.anim_window = AnimationWindow(self.points, self.degree, knots)
         self.anim_window.show()
         
