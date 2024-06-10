@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRegExp
+from PyQt5.QtGui import QRegExpValidator
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PyQt5.QtGui import QRegExpValidator
+from matplotlib.animation import FuncAnimation
 
 import numpy as np
 from scipy import interpolate
@@ -19,6 +20,56 @@ class BsplineFigure(FigureCanvas):
         self.ax.set_title('B-Spline Curve')
         super().__init__(self.fig)
         self.widget = widget  
+    
+class AnimationWindow(QWidget):
+    def __init__(self, points, degree, knots):
+        super().__init__()
+        self.points = points
+        self.degree = degree
+        self.knots = knots
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('B-Spline Animation')
+        self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
+
+        self.figure = BsplineFigure(self)
+        self.layout.addWidget(self.figure)
+
+        self.startAnimation()
+
+    def startAnimation(self):
+        self.ax = self.figure.ax
+        self.ax.clear()
+        self.ax.grid()
+        self.ax.set_xlabel('x')
+        self.ax.set_ylabel('y')
+        self.ax.set_title('B-Spline Curve Animation')
+
+        ctr = np.array(self.points)
+        x = ctr[:, 0]
+        y = ctr[:, 1]
+
+        tck = [self.knots, [x, y], self.degree]
+
+        u3 = np.linspace(self.knots[self.degree], self.knots[-self.degree-1], 100, endpoint=True)
+        self.out = interpolate.splev(u3, tck)
+
+        self.line, = self.ax.plot([], [], 'b', label='B-spline curve')
+        self.ax.plot(x, y, 'k--', label='Control polygon', marker='o', markerfacecolor='red')
+        self.ax.legend(loc='best')
+
+        self.anim = FuncAnimation(self.figure.fig, self.animate, init_func=self.init_anim, frames=100, interval=20, blit=True)
+
+    def init_anim(self):
+        self.line.set_data([], [])
+        return self.line,
+
+    def animate(self, i):
+        self.line.set_data(self.out[0][:i], self.out[1][:i])
+        return self.line,
+
 
 class QHSeparationLine(QFrame):
     '''
@@ -111,12 +162,16 @@ class BSplineWidget(QWidget):
         self.plotInterpolateButton = QPushButton('Interpolate B-Spline Curve')
         self.plotInterpolateButton.clicked.connect(self.draw_interpolate)
         
+        self.animateButton = QPushButton('Animate B-Spline Curve')
+        self.animateButton.clicked.connect(self.open_animation_window)  
+        
 
         self.layout.addWidget(self.separator)
         self.layout.addLayout(self.bellowLayout)
         self.layout.addWidget(self.separator)
         self.layout.addWidget(self.PlotButton)
         self.layout.addWidget(self.plotInterpolateButton)
+        self.layout.addWidget(self.animateButton)
         self.layout.addWidget(self.separator)
         self.layout.addLayout(self.bottomLayout)
         
@@ -350,7 +405,17 @@ class BSplineWidget(QWidget):
             self.errorLabel.show()
             return
             
-    
+    def open_animation_window(self):
+        self.update_values()
+        if self.points is None or self.degree is None:
+            return
+        knots = self.get_knot_vector()
+        if knots is None:
+            return
+
+        self.anim_window = AnimationWindow(self.points, self.degree, knots)
+        self.anim_window.show()
+        
     def random_data(self):
         self.figure.ax.clear()
         
