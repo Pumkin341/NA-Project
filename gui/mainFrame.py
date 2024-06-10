@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
-import bezierWidget
-import bsplineWidget
+from . import bezierWidget
+from . import bsplineWidget
 
 class MainFrame(QMainWindow):
     def __init__(self):
@@ -22,27 +22,21 @@ class MainFrame(QMainWindow):
         self.button_layout.addWidget(self.button2)
 
         self.layout.addLayout(self.button_layout) 
-        self.widget = QWidget()
-        self.layout.addWidget(self.widget)
 
-        self.button1.clicked.connect(self.show_bezier_widget)
-        self.button2.clicked.connect(self.show_bspline_widget)
+        self.stacked_widget = QStackedWidget()
+        self.layout.addWidget(self.stacked_widget)
 
-    def show_bezier_widget(self):
-        self.widget.deleteLater()
-        self.widget = bsplineWidget.BSplineWidget()
-        self.layout.addWidget(self.widget)
+        self.bspline_widget = bsplineWidget.BSplineWidget()
+        self.bezier_widget = bezierWidget.BezierWidget()
+
+        self.stacked_widget.addWidget(self.bspline_widget)
+        self.stacked_widget.addWidget(self.bezier_widget)
+
+        self.button1.clicked.connect(self.show_bspline_widget)
+        self.button2.clicked.connect(self.show_bezier_widget)
 
     def show_bspline_widget(self):
-        self.widget.deleteLater()
-        self.widget = bezierWidget.BezierWidget()
-        self.layout.addWidget(self.widget)
+        self.stacked_widget.setCurrentWidget(self.bspline_widget)
 
-
-if __name__ == '__main__':
-    app = QApplication([])
-    app.setStyle('Fusion')
-
-    window = MainFrame()
-    window.show()
-    app.exec_()
+    def show_bezier_widget(self):
+        self.stacked_widget.setCurrentWidget(self.bezier_widget)
