@@ -125,9 +125,27 @@ class BezierWidget(QWidget):
         else:
             count = self.combo.currentIndex() + 1
 
-        self.adjust_input_fields(count + 1)
-        self.wid.adjustSize()
-        self.adjustSize()
+        for j in range(count + 1):
+            row = QWidget()
+            layout_row = QHBoxLayout()
+            layout_row.setContentsMargins(0, 0, 0, 0)
+            row.setLayout(layout_row)
+            label = QLabel(f'P{j + 1}')
+            layout_row.addWidget(label)
+
+            line_edit1 = QLineEdit()
+            line_edit1.setPlaceholderText('Set x')
+            line_edit1.setFixedSize(100, 20)
+            layout_row.addWidget(line_edit1)
+
+            line_edit2 = QLineEdit()
+            line_edit2.setPlaceholderText('Set y')
+            line_edit2.setFixedSize(100, 20)
+            layout_row.addWidget(line_edit2)
+
+            row.setFixedHeight(20)
+            self.input_layout.addWidget(row)
+
         self.previous_index = self.combo.currentIndex()
 
     def linear_interp(self, p1, p2, t):
@@ -264,6 +282,7 @@ class BezierWidget(QWidget):
 
     def adjust_input_fields(self, required_fields):
         current_fields = self.input_layout.count()
+    
         if required_fields > current_fields:
             for _ in range(required_fields - current_fields):
                 row = QWidget()
@@ -285,6 +304,7 @@ class BezierWidget(QWidget):
 
                 row.setFixedHeight(20)
                 self.input_layout.addWidget(row)
+    
         elif required_fields < current_fields:
             for _ in range(current_fields - required_fields):
                 item = self.input_layout.itemAt(self.input_layout.count() - 1)
@@ -302,6 +322,25 @@ class BezierWidget(QWidget):
                 if ok:
                     count = num
                     while self.input_layout.count() < count + 1:
-                        self.add_input_field()
+                        row = QWidget()
+                        layout_row = QHBoxLayout()
+                        layout_row.setContentsMargins(0, 0, 0, 0)
+                        row.setLayout(layout_row)
+                        label = QLabel(f'P{self.input_layout.count() + 1}')
+                        layout_row.addWidget(label)
+
+                        line_edit1 = QLineEdit()
+                        line_edit1.setPlaceholderText('Set x')
+                        line_edit1.setFixedSize(100, 20)
+                        layout_row.addWidget(line_edit1)
+
+                        line_edit2 = QLineEdit()
+                        line_edit2.setPlaceholderText('Set y')
+                        line_edit2.setFixedSize(100, 20)
+                        layout_row.addWidget(line_edit2)
+
+                        row.setFixedHeight(20)
+                        self.input_layout.addWidget(row)
                 else:
                     return
+

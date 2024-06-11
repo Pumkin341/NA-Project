@@ -124,6 +124,10 @@ class BSplineWidget(QWidget):
         #right 
         self.degreeLabel = QLabel('Degree')
         self.degreeField = QLineEdit()
+        reg_ex = QRegExp("[0-9]*")
+        input_validator = QRegExpValidator(reg_ex)
+        self.degreeField.setValidator(input_validator)
+        
         self.degreeField.setText('3')
         self.rightLayout.addWidget(self.degreeLabel, 0, 0)
         self.rightLayout.addWidget(self.degreeField, 0, 1)
@@ -234,7 +238,7 @@ class BSplineWidget(QWidget):
         yField = QLineEdit()
         
         reg_ex = QRegExp("[0-9]+.?[0-9]{,2}")
-        input_validator = QRegExpValidator(reg_ex, xField)
+        input_validator = QRegExpValidator(reg_ex)
         xField.setValidator(input_validator)
         yField.setValidator(input_validator)
         
@@ -502,7 +506,9 @@ class BSplineWidget(QWidget):
             points = re.findall(r'\(([^)]+)\)', points_str)
             points = [tuple(map(float, point.split(','))) for point in points]
 
-            self.clear_points()
+            if self.pointsArray:
+                self.clear_points()
+                
             for point in points:
                 self.add_point()
                 pointLayout = self.pointsArray[-1]
