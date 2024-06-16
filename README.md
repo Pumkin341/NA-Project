@@ -17,17 +17,6 @@ This project involves developing a PyQt-based GUI application for visualizing an
     - Random Control Points:  Generate random control points for quick testing.
     - User Interaction: Provide a user-friendly interface with real-time updates and visual feedback.
 
-
-**Contibutions of each member:**
-Hutuleac Andrei:
-    - B-Spline part of the project
-Trifan Lucian:
-    - Bezier de Casteljau part of the project 
-Coatu Dinu:
-    - Implemented the txt and json file reading functionality for Bezier, helped with debugging 
-    
-    
-
 Install requirements.txt using:
 ```
 pip install -r /path/to/requirements.txt
