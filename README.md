@@ -5,6 +5,7 @@ This project involves developing a PyQt-based GUI application for visualizing an
 
 
 **Implemented Functionalities:**
+
     - Control Point Input: Allow users to input and edit control points.
     - Degree Specification: Allow users to specify the degree of the curve.
     - Knot Vector Generation: Generate or import knot vectors for B-Spline curves.
